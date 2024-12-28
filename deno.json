@@ -1,0 +1,9 @@
+{
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "dev": "deno run -A main.ts"
+  },
+  "imports": {
+    "style-dictionary": "npm:style-dictionary@^4.3.0"
+  }
+}
