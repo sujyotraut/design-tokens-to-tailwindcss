@@ -1,7 +1,7 @@
 import StyleDictionary from "style-dictionary";
 import { register } from "@tokens-studio/sd-transforms";
 import type { TransformedToken } from "style-dictionary/types";
-import { transformFontFamily, transformLetterSpacing, transformLineHeight } from "./typographyTransforms.ts";
+import { transformFontFamily, transformLetterSpacing, transformLineHeight } from "./transforms.ts";
 import { createTypographyUtility, isTypography } from "./utils.ts";
 
 register(StyleDictionary, { withSDBuiltins: false });
@@ -54,6 +54,8 @@ const styleDictionary = new StyleDictionary({
             buildPath: "build/",
             options: {
                 breakpoints: ["768px", "1024px", "1280px"],
+                letterSpacingUnit: "px",
+                lineHeightUnit: "px",
             },
             files: [
                 {

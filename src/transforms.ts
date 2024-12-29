@@ -1,22 +1,13 @@
 import { TransformedToken, PlatformConfig } from "style-dictionary";
 
 export function transformFontFamily(token: TransformedToken) {
-    // const tokenValue = token.$value ?? token.value;
-    // const tokenType = token.$type ?? token.type;
-    //
-    // if (tokenType === "fontFamily") {
-    //     const containsSpace = tokenValue.trim().includes(" ");
-    //     return containsSpace ? `"${tokenValue}"` : tokenValue;
-    // }
-    //
-    // const typographyTokenValue = tokenValue as TokenTypographyValue;
-
     // Handle font family spaces
     const typographyTokenValue = token.$value ?? token.value;
     if (Object.hasOwn(typographyTokenValue, "fontFamily") && typographyTokenValue.fontFamily) {
         const fontFamilies = typographyTokenValue.fontFamily.split(",").map((value: string) => {
-            const containsSpace = value.trim().includes(" ");
-            return containsSpace ? `"${value}"` : value;
+            const trimmedValue = value.trim();
+            const containsSpace = trimmedValue.includes(" ");
+            return containsSpace ? `"${trimmedValue}"` : trimmedValue;
         });
 
         // Adds fallback font
@@ -26,11 +17,18 @@ export function transformFontFamily(token: TransformedToken) {
     return typographyTokenValue;
 }
 
-export function transformLineHeight(token: TransformedToken) {
+export function transformLineHeight(token: TransformedToken, platform: PlatformConfig) {
     const typographyTokenValue = token.$value ?? token.value;
     if (Object.hasOwn(typographyTokenValue, "lineHeight") && typographyTokenValue.lineHeight) {
         const lineHeight = typographyTokenValue.lineHeight;
-        typographyTokenValue.lineHeight = parseFloat(lineHeight.toString()) / 100;
+        if (lineHeight.endsWith("%")) {
+            typographyTokenValue.lineHeight = (parseFloat(lineHeight.toString()) / 100).toFixed(3);
+        } else if (platform.options?.lineHeightUnit) {
+            typographyTokenValue.lineHeight = parseFloat(lineHeight) + platform.options.lineHeightUnit;
+        } else {
+            const newLineHeight = parseFloat(lineHeight) / parseFloat(typographyTokenValue.fontSize);
+            typographyTokenValue.lineHeight = newLineHeight.toFixed(3);
+        }
     }
 
     return typographyTokenValue;
@@ -41,7 +39,7 @@ export function transformLetterSpacing(token: TransformedToken, platform: Platfo
     if (Object.hasOwn(typographyTokenValue, "letterSpacing") && typographyTokenValue.letterSpacing) {
         const letterSpacing = typographyTokenValue.letterSpacing;
         const shouldAddUnit = parseFloat(letterSpacing) != 0;
-        const letterSpacingUnit = platform.options?.typography?.letterSpacingUnit ?? "px";
+        const letterSpacingUnit = platform.options?.letterSpacingUnit ?? "px";
         typographyTokenValue.letterSpacing = letterSpacing + (shouldAddUnit ? letterSpacingUnit : "");
     }
 
