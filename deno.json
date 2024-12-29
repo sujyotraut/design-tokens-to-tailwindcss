@@ -1,11 +1,12 @@
 {
     "nodeModulesDir": "auto",
     "tasks": {
-        "build": "deno run -A main.ts"
+        "build": "deno run -A src/main.ts"
     },
     "imports": {
         "@std/text": "jsr:@std/text@^1.0.9",
         "@tokens-studio/sd-transforms": "npm:@tokens-studio/sd-transforms@^1.2.9",
+        "@tokens-studio/types": "npm:@tokens-studio/types@^0.5.1",
         "style-dictionary": "npm:style-dictionary@^4.3.0"
     }
 }

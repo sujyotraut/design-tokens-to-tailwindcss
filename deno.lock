@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@std/text@^1.0.9": "1.0.9",
     "npm:@tokens-studio/sd-transforms@^1.2.9": "1.2.9_style-dictionary@4.3.0",
+    "npm:@tokens-studio/types@~0.5.1": "0.5.1",
     "npm:style-dictionary@^4.3.0": "4.3.0"
   },
   "jsr": {
@@ -905,6 +906,7 @@
     "dependencies": [
       "jsr:@std/text@^1.0.9",
       "npm:@tokens-studio/sd-transforms@^1.2.9",
+      "npm:@tokens-studio/types@~0.5.1",
       "npm:style-dictionary@^4.3.0"
     ]
   }
