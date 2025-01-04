@@ -1,6 +1,8 @@
 import postcss from "postcss";
 import postcssJs from "postcss-js";
 import StyleDictionary from "style-dictionary";
+import { partition } from "@std/collections/partition";
+import { toKebabCase } from "@std/text/to-kebab-case";
 import { register } from "@tokens-studio/sd-transforms";
 import type { TransformedToken } from "style-dictionary/types";
 import { createTypographyUtility, isTypography } from "./utils.ts";
@@ -33,22 +35,44 @@ const styleDictionary = new StyleDictionary({
         },
         formats: {
             tailwindcss: async ({ dictionary, options }) => {
-                const breakpoints: Record<string, string> = options.breakpoints ?? {};
-                let typographyTokens: { [key: string]: string | Record<string, string> } = {};
+                const [compositeTokens, tokens] = partition(dictionary.allTokens, (transformedToken) => {
+                    const tokenType = transformedToken.$type ?? transformedToken.type;
+                    return ["border", "shadow", "typography"].includes(tokenType ?? "");
+                });
 
-                for (const [name, tokens] of Map.groupBy(dictionary.allTokens, ({ path }) => path.slice(1).join("-"))) {
+                // #region Tokens
+                const cssVariables: { ":root": Record<string, string> } = { ":root": {} };
+                tokens.forEach(({ name, $value, value }) => (cssVariables[":root"]["--" + toKebabCase(name)] = $value ?? value));
+                // #endregion
+
+                const compositeTokensMap = Map.groupBy(compositeTokens, ({ $type, type }) => $type ?? type);
+
+                // #region Border tokens
+                const borderTokens = compositeTokensMap.get("border") ?? [];
+                // #endregion
+
+                // #region Shadow tokens
+                const shadowTokens = compositeTokensMap.get("shadow") ?? [];
+                // #endregion
+
+                // #region Typography tokens
+                const typographyTokens = compositeTokensMap.get("typography") ?? [];
+                const breakpoints: Record<string, string> = options.breakpoints ?? {};
+                let typographyUtilities: { [key: string]: string | Record<string, string> } = {};
+
+                for (const [name, tokens] of Map.groupBy(typographyTokens, ({ path }) => path.slice(1).join("-"))) {
                     const tokensRecord: Record<string, TransformedToken | undefined> = {};
 
-                    Object.keys(breakpoints).forEach(
-                        (breakpoint) => (tokensRecord[breakpoint] = tokens.find(({ path }) => path[0] === breakpoint))
-                    );
+                    Object.keys(breakpoints).forEach((breakpoint) => (tokensRecord[breakpoint] = tokens.find(({ path }) => path[0] === breakpoint)));
 
                     const typographyUtility = createTypographyUtility("typography-" + name, tokensRecord, breakpoints);
-                    typographyTokens = Object.assign(typographyTokens, typographyUtility);
+                    typographyUtilities = Object.assign(typographyUtilities, typographyUtility);
                 }
+                // #endregion
 
-                const result = await postcss().process(typographyTokens, { from: undefined, parser: postcssJs });
-                return result.css;
+                const cssInJs = Object.assign(cssVariables, typographyUtilities);
+                const result = await postcss().process(cssInJs, { from: undefined, parser: postcssJs });
+                return result.css.replaceAll("@utility", "\n@utility");
             },
         },
     },
@@ -68,7 +92,6 @@ const styleDictionary = new StyleDictionary({
             },
             files: [
                 {
-                    filter: isTypography,
                     format: "tailwindcss",
                     destination: "app.css",
                 },
