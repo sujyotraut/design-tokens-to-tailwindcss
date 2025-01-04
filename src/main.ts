@@ -41,24 +41,27 @@ const styleDictionary = new StyleDictionary({
                 });
 
                 // #region Tokens
-                const cssVariables: { ":root": Record<string, string> } = { ":root": {} };
-                tokens.forEach(({ name, $value, value }) => (cssVariables[":root"]["--" + toKebabCase(name)] = $value ?? value));
+                const cssInJsVariables: { ":root": Record<string, string> } = { ":root": {} };
+                tokens.forEach(({ name, $value, value }) => (cssInJsVariables[":root"]["--" + toKebabCase(name)] = $value ?? value));
                 // #endregion
 
+                // #region Composite tokens
                 const compositeTokensMap = Map.groupBy(compositeTokens, ({ $type, type }) => $type ?? type);
 
                 // #region Border tokens
                 const borderTokens = compositeTokensMap.get("border") ?? [];
+                const cssInJsBorders = {};
                 // #endregion
 
                 // #region Shadow tokens
                 const shadowTokens = compositeTokensMap.get("shadow") ?? [];
+                const cssInJsShadows = {};
                 // #endregion
 
                 // #region Typography tokens
                 const typographyTokens = compositeTokensMap.get("typography") ?? [];
                 const breakpoints: Record<string, string> = options.breakpoints ?? {};
-                let typographyUtilities: { [key: string]: string | Record<string, string> } = {};
+                let cssInJsTypography: { [key: string]: string | Record<string, string> } = {};
 
                 for (const [name, tokens] of Map.groupBy(typographyTokens, ({ path }) => path.slice(1).join("-"))) {
                     const tokensRecord: Record<string, TransformedToken | undefined> = {};
@@ -66,11 +69,12 @@ const styleDictionary = new StyleDictionary({
                     Object.keys(breakpoints).forEach((breakpoint) => (tokensRecord[breakpoint] = tokens.find(({ path }) => path[0] === breakpoint)));
 
                     const typographyUtility = createTypographyUtility("typography-" + name, tokensRecord, breakpoints);
-                    typographyUtilities = Object.assign(typographyUtilities, typographyUtility);
+                    cssInJsTypography = Object.assign(cssInJsTypography, typographyUtility);
                 }
                 // #endregion
+                // #endregion
 
-                const cssInJs = Object.assign(cssVariables, typographyUtilities);
+                const cssInJs = Object.assign(cssInJsVariables, cssInJsBorders, cssInJsShadows, cssInJsTypography);
                 const result = await postcss().process(cssInJs, { from: undefined, parser: postcssJs });
                 return result.css.replaceAll("@utility", "\n@utility");
             },
