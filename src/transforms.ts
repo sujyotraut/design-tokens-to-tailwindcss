@@ -20,9 +20,9 @@ export function transformFontFamily(token: TransformedToken) {
 export function transformLineHeight(token: TransformedToken, platform: PlatformConfig) {
     const typographyTokenValue = token.$value ?? token.value;
     if (Object.hasOwn(typographyTokenValue, "lineHeight") && typographyTokenValue.lineHeight) {
-        const lineHeight = typographyTokenValue.lineHeight;
+        const lineHeight = typographyTokenValue.lineHeight.toString();
         if (lineHeight.endsWith("%")) {
-            typographyTokenValue.lineHeight = (parseFloat(lineHeight.toString()) / 100).toFixed(3);
+            typographyTokenValue.lineHeight = (parseFloat(lineHeight) / 100).toFixed(3);
         } else if (platform.options?.lineHeightUnit) {
             typographyTokenValue.lineHeight = parseFloat(lineHeight) + platform.options.lineHeightUnit;
         } else {
