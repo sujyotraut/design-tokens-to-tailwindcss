@@ -1,17 +1,20 @@
 {
     "nodeModulesDir": "auto",
     "tasks": {
-        "build": "deno run -A src/main.ts"
+        "build": "deno run -A build.ts"
     },
     "imports": {
         "@std/collections": "jsr:@std/collections@^1.0.9",
         "@std/text": "jsr:@std/text@^1.0.9",
         "@tokens-studio/sd-transforms": "npm:@tokens-studio/sd-transforms@^1.2.9",
         "@tokens-studio/types": "npm:@tokens-studio/types@^0.5.1",
+        "@types/postcss-js": "npm:@types/postcss-js@^4.0.4",
         "postcss": "npm:postcss@^8.4.49",
+        "postcss-import": "npm:postcss-import@^16.1.0",
         "postcss-js": "npm:postcss-js@^4.0.1",
         "style-dictionary": "npm:style-dictionary@^4.3.0",
         "stylelint": "npm:stylelint@^16.12.0",
-        "stylelint-config-standard": "npm:stylelint-config-standard@^36.0.1"
+        "stylelint-config-standard": "npm:stylelint-config-standard@^36.0.1",
+        "tailwindcss": "npm:tailwindcss@^4.0.0-beta.9"
     }
 }
