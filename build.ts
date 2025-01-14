@@ -51,6 +51,12 @@ const styleDictionary = new StyleDictionary({
                         typographyTokenValue.letterSpacing = letterSpacing + (shouldAddUnit ? letterSpacingUnit : "");
                     }
 
+                    if (Object.hasOwn(typographyTokenValue, "textCase") && typographyTokenValue.textCase) {
+                        const textCase = typographyTokenValue.textCase;
+                        delete typographyTokenValue.textCase;
+                        typographyTokenValue.textTransform = textCase;
+                    }
+
                     return typographyTokenValue;
                 },
             },
