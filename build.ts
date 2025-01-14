@@ -32,17 +32,21 @@ const styleDictionary = new StyleDictionary({
                         typographyTokenValue.fontFamily = fontFamilies.join(", ") + ", " + "sans-serif";
                     }
 
-                    // if (Object.hasOwn(typographyTokenValue, "lineHeight") && typographyTokenValue.lineHeight) {
-                    //     const lineHeight = typographyTokenValue.lineHeight.toString();
-                    //     if (lineHeight.endsWith("%")) {
-                    //         typographyTokenValue.lineHeight = (parseFloat(lineHeight) / 100).toFixed(3);
-                    //     } else if (platform.options?.lineHeightUnit) {
-                    //         typographyTokenValue.lineHeight = parseFloat(lineHeight) + platform.options.lineHeightUnit;
-                    //     } else {
-                    //         const newLineHeight = parseFloat(lineHeight) / parseFloat(typographyTokenValue.fontSize);
-                    //         typographyTokenValue.lineHeight = newLineHeight.toFixed(3);
-                    //     }
-                    // }
+                    if (Object.hasOwn(typographyTokenValue, "lineHeight") && typeof typographyTokenValue.lineHeight === "string") {
+                        const lineHeight = typographyTokenValue.lineHeight;
+                        const lineHeightUnit = platform.lineHeightUnit ?? "px";
+                        const hasUnit = !/\d$/.test(lineHeight);
+                        typographyTokenValue.lineHeight = hasUnit ? lineHeight : parseFloat(lineHeight) + lineHeightUnit;
+                    }
+
+                    if (Object.hasOwn(typographyTokenValue, "letterSpacing")) {
+                        const letterSpacing = typographyTokenValue.letterSpacing;
+                        const letterSpacingUnit = platform.letterSpacingUnit ?? "px";
+                        const isZero = parseFloat(letterSpacing) === 0;
+                        const hasUnit = !/\d$/.test(letterSpacing);
+                        if (isZero) typographyTokenValue.letterSpacing = "0";
+                        else typographyTokenValue.letterSpacing = hasUnit ? letterSpacing : parseFloat(letterSpacing) + letterSpacingUnit;
+                    }
 
                     if (Object.hasOwn(typographyTokenValue, "textCase") && typographyTokenValue.textCase) {
                         const textCase = typographyTokenValue.textCase;
@@ -108,8 +112,6 @@ const styleDictionary = new StyleDictionary({
             transforms: ["css/typography"],
             buildPath: "build/",
             options: {
-                letterSpacingUnit: "px",
-                lineHeightUnit: "px",
                 breakpoints: {
                     mobile: "360px",
                     tablet: "theme(screens.md)",
